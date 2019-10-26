@@ -30,7 +30,7 @@ class Figure:
         self.mass = 1
         self.score = 0
 
-    def move(self, dx, dy):
+    def move(self, dx, dy, *args):
         """Moves object on dx, dy"""
         self.x += dx
         self.y += dy
@@ -90,15 +90,6 @@ class Figure:
             self.vy = vy_s2 + vy_c
             other.vx = vx_o2 + vx_c
             other.vy = vy_o2 + vy_c
-
-            # pushing sticked figures
-            #    if (self.x - other.x) ** 2 + (self.y - other.y) ** 2 < \
-            #            (self.r + other.r - 3) ** 2:
-            #        dr_w = (self.r + other.r - ((self.x - other.x) ** 2 +
-            #                                 (self.y - other.y) ** 2)**0.5) / \
-            #             (self.mass + other.mass)
-            #        self.x, other.x =
-
             return True
         else:
             return False

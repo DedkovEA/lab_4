@@ -21,7 +21,7 @@ class ScoreLine:
 
 class Scores:
     def __init__(self, file):
-        self.lines = [ScoreLine(line=i) for i in [j for j in file][5:]] #may be generator
+        self.lines = [ScoreLine(line=i) for i in [j for j in file][5:]]
 
     def add_line(self, line):
         self.lines.append(ScoreLine(line))
