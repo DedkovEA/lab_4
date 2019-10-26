@@ -121,4 +121,3 @@ def click(ball_set, score_label, event):
 if __name__ == "__main__":
     score = 0
     main()
-

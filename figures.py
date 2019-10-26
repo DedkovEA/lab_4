@@ -194,8 +194,8 @@ class TrickyBall(Figure):
 
     def recalculate_position(self, *args):
         super().recalculate_position(*args)
-        distance = ((self.x - args[0])**2 + (self.y - args[1])**2) ** 0.5
-        self.vx += cursor_interaction_constant * (self.x - args[0]) / \
-                   distance ** 3 / self.mass
-        self.vy += cursor_interaction_constant * (self.y - args[1]) / \
-                   distance ** 3 / self.mass
+        distance = ((self.x - args[0]) ** 2 + (self.y - args[1]) ** 2) ** 0.5
+        self.vx += cursor_interaction_constant * (
+                    self.x - args[0]) / distance ** 3 / self.mass
+        self.vy += cursor_interaction_constant * (
+                    self.y - args[1]) / distance ** 3 / self.mass

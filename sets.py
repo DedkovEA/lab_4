@@ -42,15 +42,6 @@ class FigureSet:
                                                 self.canvas))
         return counter
 
-   # def fix_position(self, figure):
-   #     for other_figure in self.figure_list:
-   #         while (figure.x - other_figure.x)**2 + \
-   #               (figure.y - other_figure.y)**2 <= \
-   #               (figure.r + other_figure.r + 5)**2:
-   #             figure.delete()
-   #             figure = figures.generate_figure(figure, self.canvas)
-   #     return figure
-
     def motion(self, event):
         self.cursor_x, self.cursor_y = event.x, event.y
         return True
