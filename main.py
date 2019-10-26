@@ -1,91 +1,124 @@
 import tkinter
-from random import randrange as rnd, choice, random
 import figures
 import sets
+import score_line
 
-# Initializing root window and setting its size
-root = tkinter.Tk()
 
-# Initializing canvas and score label
-score_label = tkinter.Label(root, text='Score: 0')
-canvas = tkinter.Canvas(root, bg='white', width=800, height=600)
+def main():
+    # Initializing root window and setting its size
+    root = tkinter.Tk()
+    root.title("Ball Shooter")
 
-# packing objects
-canvas.pack(fill=tkinter.BOTH, expand=1)
-score_label.pack(anchor=tkinter.W, fill=tkinter.Y, expand=0)
+    menu(root)
+    root.mainloop()
 
-canvas.update()
-width = canvas.winfo_width()
-height = canvas.winfo_height()
 
-# initializing colors
-# colors = ['red', 'orange', 'yellow', 'green', 'blue']
+def menu(root):
+    def start(root):
+        root.destroy()
+        root = tkinter.Tk()
+        root.title("Ball Shooter")
 
-# score init
-score = 0
+        enter_name_label = tkinter.Label(root, text='Enter your name')
+        name = tkinter.StringVar()
+        name_entry = tkinter.Entry(root, textvariable=name)
+        submit_button = tkinter.Button(root, text='Submit',
+                                       command=lambda: game_start(root, name))
 
-ball_number = 5
-tricky_ball_number = 2
-# initialization of ball list
-# ball_list = list()
+        enter_name_label.pack()
+        name_entry.pack()
+        submit_button.pack()
 
-def tick2():
+    title = tkinter.Label(root, text="Ball Shoot", font=("Arial", 18),
+                          anchor=tkinter.CENTER)
+    button_start = tkinter.Button(root, text="Start Game",
+                                  command=lambda: start(root))
+    button_exit = tkinter.Button(root, text="Exit", command=lambda: exit())
+
+    title.grid(column=1, row=1)
+    button_start.grid(column=1, row=2)
+    button_exit.grid(column=1, row=4)
+
+
+def game_start(root, name):
+    root.destroy()
+
+    root = tkinter.Tk()
+    root.title("Ball Shooter")
+    # Initializing canvas and score label
+    canvas = tkinter.Canvas(root, bg='white', width=800, height=600)
+    labels_frame = tkinter.Frame(root)
+    time_label = tkinter.Label(labels_frame, text='Time remains: 6s')
+    score_label = tkinter.Label(labels_frame, text='Score: 0')
+
+    # packing objects
+    canvas.pack(fill=tkinter.BOTH, expand=1)
+    labels_frame.pack(anchor=tkinter.W, fill=tkinter.BOTH, expand=1)
+    time_label.grid(row=1, column=2, sticky=tkinter.E)
+    score_label.grid(row=1, column=1, sticky=tkinter.W)
+
+    canvas.update()
+
+    # score init
+    global score
+    score = 0
+
+    ball_number = 5
+    tricky_ball_number = 2
+
+    # initialization of ball list
+    ball_set = sets.FigureSet(canvas)
+
+    for i in range(ball_number):
+        ball_set.add_object(figures.Ball(canvas))
+
+    for i in range(tricky_ball_number):
+        ball_set.add_object(figures.TrickyBall(canvas))
+
+    tick(root, canvas, ball_set)
+    canvas.bind('<Button-1>', lambda e: click(ball_set, score_label, e))
+    root.after(1000, lambda: timer_decrease(root, time_label, name))
+
+
+def timer_decrease(root, time_label, name):
+    current_time = int(time_label['text'].split(' ')[2][0:-1])
+    current_time -= 1
+    time_label['text'] = 'Time remains: ' + str(current_time) + 's'
+
+    if current_time <= 0:
+        end_game(root, name)
+    else:
+        root.after(1000, lambda: timer_decrease(root, time_label, name))
+
+
+def end_game(root, name):
+    with open('score.txt', 'r') as file:
+        scores = score_line.Scores(file)
+
+        result = '{place:>5}|{nick:<16}|{score:>8}'.format(place='1',
+                                                           nick=name.get(),
+                                                           score=score)
+        scores.add_line(result)
+    with open('score.txt', 'w') as file:
+        scores.write_to_file(file)
+
+    root.destroy()
+    main()
+
+
+def tick(root, canvas, ball_set):
     ball_set.evolute(50, 0, canvas.winfo_width(), 0, canvas.winfo_height())
-    root.after(20, tick2)
+    root.after(20, lambda: tick(root, canvas, ball_set))
 
-def click2(event):
+
+def click(ball_set, score_label, event):
     global score
     score += ball_set.shoot(event.x, event.y)
     score_label['text'] = 'Score: ' + str(score)
     return True
 
-def tick():
-    """
-    Executed every 50ms
-    """
-    global ball_list
-    for current_ball in ball_list:
-        if current_ball.lifetime_add(50):
-            ball_list.remove(current_ball)
-        current_ball.recalculate_position()
-        current_ball.reflect_from_boundaries(0, canvas.winfo_width(), 0, height)
-    if len(ball_list) < 2:
-        x = rnd(100, canvas.winfo_width() - 100)
-        y = rnd(100, height - 100)
-        r = rnd(30, 50)
-        t = rnd(1900, 112000)
-        vx = 15 - 30 * random()
-        vy = 15 - 30 * random()
-        ball_list.append(figures.Ball(canvas, x, y, r,
-                                      choice(colors), t, vx, vy))
-    root.after(50, tick)
 
+if __name__ == "__main__":
+    score = 0
+    main()
 
-def click(event):
-    """
-    Increment score, if event coordinates are in consisting ball
-    :param event: event with x and y properties
-    :return: True if score got
-    """
-    global score
-    success = False
-    for current_ball in ball_list:
-        if current_ball.includes_point(event.x, event.y):
-            score += 1
-            current_ball.delete()
-            ball_list.remove(current_ball)
-            score_label['text'] = 'Score: ' + str(score)
-            success = True
-    return success
-
-ball_set = sets.FigureSet(canvas)
-
-for i in range(ball_number):
-    ball_set.add_object(figures.Ball(canvas))
-
-for i in range(tricky_ball_number):
-    ball_set.add_object(figures.TrickyBall(canvas))
-
-tick2()
-canvas.bind('<Button-1>', click2)
-tkinter.mainloop()
